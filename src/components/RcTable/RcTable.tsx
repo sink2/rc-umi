@@ -731,13 +731,15 @@ class Table extends Component<TableProps, TableState<any>> {
                                 </ColumnGroup>
                             );
                         })}
-                    <Column
-                        title="操作"
-                        render={(_, record, index) =>
-                            convertColumnAction(columnActions, columnActionMenu, record, index)
-                        }
-                        width={calcColumnActionWidth(columnActions, columnActionMenu)}
-                    />
+                    {columnActions.length ? (
+                        <Column
+                            title="操作"
+                            render={(_, record, index) =>
+                                convertColumnAction(columnActions, columnActionMenu, record, index)
+                            }
+                            width={calcColumnActionWidth(columnActions, columnActionMenu)}
+                        />
+                    ) : null}
                 </AntdTable>
             </Fragment>
         );
