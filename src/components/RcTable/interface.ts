@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
 export type Render<T> = (value: any, record: T, index: number) => ReactNode;
 export type ConvertType = 'date' | 'dateTime' | 'number' | 'string' | '';
@@ -75,7 +75,7 @@ export interface TableFilterItemProps {
     label: string;
     key: string;
     type?: 'text' | 'date' | 'dateTime' | 'range' | 'enum';
-    render?: (value: any) => (string | number);
+    render?: (value: any) => string | number;
     options?: Options[];
     [key: string]: any;
 }
@@ -90,7 +90,7 @@ export interface TableFilters {
     key: string;
     value: any;
     type?: 'text' | 'date' | 'dateTime' | 'range' | 'enum';
-    render?: (value: any) => (string | number);
+    render?: (value: any) => string | number;
 }
 export interface TableSorters {
     key: string;
@@ -111,6 +111,7 @@ export interface TableState<T> {
     currentPage: number;
     pageSize: number;
     data: T[];
+    total: number;
     filters: TableFilters[];
     sorters: TableSorters[];
     selectedRows: T[];
@@ -125,4 +126,5 @@ export interface TableRequestData<T> {
     filters?: TableFilters[];
     sorters?: TableSorters[];
     selectedRows?: T[];
+    total?: number;
 }

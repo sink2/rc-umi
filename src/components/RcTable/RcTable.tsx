@@ -304,9 +304,15 @@ class Table extends Component<TableProps, TableState<any>> {
         if (head && head.children) {
             const filter = getTableComponentProps(head.children, TableFilter, true);
             if (filter) {
+                const childProps = Array.isArray(filter.children)
+                    ? filter.children[0].props
+                    : filter.children.props;
+                const childKey = Array.isArray(filter.children)
+                    ? filter.children[0].key
+                    : filter.children.key;
                 this.state.currentFilter = {
-                    ...filter.children[0].props,
-                    key: filter.children[0].key,
+                    ...childProps,
+                    key: childKey,
                 };
             }
         }
@@ -316,6 +322,7 @@ class Table extends Component<TableProps, TableState<any>> {
         currentPage: 1,
         pageSize: 10,
         data: [],
+        total: 0,
         filters: [],
         sorters: [],
         selectedRows: [],
@@ -624,6 +631,7 @@ class Table extends Component<TableProps, TableState<any>> {
             'filters',
             'sorters',
             'selectedRows',
+            'total',
         ]);
     }
 
@@ -637,6 +645,7 @@ class Table extends Component<TableProps, TableState<any>> {
                 'sorters',
                 'selectedRows',
                 'loading',
+                'total',
             ])
         );
     }
@@ -660,6 +669,7 @@ class Table extends Component<TableProps, TableState<any>> {
                 selectedRows: result.selectedRows || selectedRows,
                 data: result.data || data,
                 loading: false,
+                total: result.total || sorters,
             };
             this.setState({ ...nextState });
         });
@@ -686,7 +696,7 @@ class Table extends Component<TableProps, TableState<any>> {
     render() {
         const { children, rowKey } = this.props;
         const columnGroups = [];
-        const { data, loading, filters } = this.state;
+        const { data, loading, filters, total } = this.state;
         // TODO: optimise
         const columns = getTableComponentProps(children, TableCloumn);
         const columnActions = getTableComponentProps(children, TableAction);
@@ -707,7 +717,7 @@ class Table extends Component<TableProps, TableState<any>> {
                     dataSource={data}
                     loading={loading}
                     onChange={this.handleTableChange.bind(this)}
-                    pagination={paginationSetting}
+                    pagination={{ ...paginationSetting, total }}
                     rowSelection={this.getTableRowSelection(rowSelection)}
                 >
                     {columns
