@@ -95,7 +95,7 @@ function convertToRender(convert: null | ConvertType | Convert): Render<any> {
             if (!isBlank(convertObject.format)) {
                 options.format = convertObject.format;
             }
-            convertRender = (val: any) => convertToLocalDate(val, options) || '-';
+            convertRender = (val: any) => (val ? convertToLocalDate(val, options) : '-');
             break;
         case 'dateTime':
             if (!isBlank(convertObject.timezone)) {
@@ -104,7 +104,7 @@ function convertToRender(convert: null | ConvertType | Convert): Render<any> {
             if (!isBlank(convertObject.format)) {
                 options.format = convertObject.format;
             }
-            convertRender = (val: any) => convertToLocalDate(val, options) || '-';
+            convertRender = (val: any) => (val ? convertToLocalDate(val, options) : '-');
             break;
         case 'number':
             convertRender = (val: any) => formatNumber(val) || '-';
@@ -258,6 +258,7 @@ function getPagination(pagination: TablePaginationProps | undefined) {
         pageSizeOptions,
         showSizeChanger: pageSizeOptions ? true : false,
         showTotal: render,
+        total: 0,
     };
 }
 
@@ -295,6 +296,8 @@ class Table extends Component<TableProps, TableState<any>> {
         const head = getTableComponentProps(children, TableHead, true);
         const columns = getTableComponentProps(children, TableCloumn);
         const defaultSortColumn = find(columns, col => col.sort && col.defaultSort);
+        const pagination = getTableComponentProps(children, TablePagination, true);
+        const paginationSetting = getPagination(pagination);
         if (defaultSortColumn) {
             this.state.sorters.push({
                 key: defaultSortColumn.key,
@@ -315,6 +318,10 @@ class Table extends Component<TableProps, TableState<any>> {
                     key: childKey,
                 };
             }
+        }
+        if (paginationSetting) {
+            const { pageSize } = paginationSetting;
+            this.state.pageSize = pageSize;
         }
     }
 
@@ -652,7 +659,15 @@ class Table extends Component<TableProps, TableState<any>> {
 
     loadData(loading: boolean = true) {
         this.setState({ loading }, async () => {
-            const { currentPage, pageSize, filters, sorters, selectedRows, data } = this.state;
+            const {
+                currentPage,
+                pageSize,
+                filters,
+                sorters,
+                selectedRows,
+                data,
+                total,
+            } = this.state;
             const result = await Table.handleRequestData(
                 this.props,
                 currentPage,
@@ -669,7 +684,7 @@ class Table extends Component<TableProps, TableState<any>> {
                 selectedRows: result.selectedRows || selectedRows,
                 data: result.data || data,
                 loading: false,
-                total: result.total || sorters,
+                total: result.total || total,
             };
             this.setState({ ...nextState });
         });
@@ -696,7 +711,7 @@ class Table extends Component<TableProps, TableState<any>> {
     render() {
         const { children, rowKey } = this.props;
         const columnGroups = [];
-        const { data, loading, filters, total } = this.state;
+        const { data, loading, filters, total, pageSize } = this.state;
         // TODO: optimise
         const columns = getTableComponentProps(children, TableCloumn);
         const columnActions = getTableComponentProps(children, TableAction);
@@ -704,6 +719,10 @@ class Table extends Component<TableProps, TableState<any>> {
         const head = getTableComponentProps(children, TableHead, true);
         const pagination = getTableComponentProps(children, TablePagination, true);
         const paginationSetting = getPagination(pagination);
+        if (paginationSetting) {
+            paginationSetting.total = total;
+            paginationSetting.pageSize = pageSize;
+        }
         const rowSelection = getTableComponentProps(children, TableRowSelection, true);
         return (
             <Fragment>
@@ -717,7 +736,7 @@ class Table extends Component<TableProps, TableState<any>> {
                     dataSource={data}
                     loading={loading}
                     onChange={this.handleTableChange.bind(this)}
-                    pagination={{ ...paginationSetting, total }}
+                    pagination={paginationSetting}
                     rowSelection={this.getTableRowSelection(rowSelection)}
                 >
                     {columns
