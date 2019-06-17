@@ -613,7 +613,7 @@ class Table extends Component<TableProps, TableState<any>> {
 
     getTableRowSelection(rowSelection: TableRowSelectionProps<any>): any {
         if (!rowSelection) return false;
-        const { rowKey } = this.props;
+        const { rowKey = 'id' } = this.props;
         const { selectedRows } = this.state;
         const { type, fixed, width, disabled } = rowSelection;
         const getCheckboxProps = (record: any) => {
