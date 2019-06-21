@@ -486,7 +486,7 @@ class Table extends Component<TableProps, TableState<any>> {
             } = this.state;
             const currentFilterItem = find(filters, f => f.key === key);
             if (
-                !currentFilterValue ||
+                isBlank(currentFilterValue) ||
                 (isArray(currentFilterValue) && !currentFilterValue.length)
             ) {
                 return;
@@ -681,7 +681,7 @@ class Table extends Component<TableProps, TableState<any>> {
                 pageSize: result.pageSize || pageSize,
                 filters: result.filters || filters,
                 sorters: result.sorters || sorters,
-                selectedRows: result.selectedRows || selectedRows,
+                selectedRows: result.selectedRows || [],
                 data: result.data || data,
                 loading: false,
                 total: result.total || total,
